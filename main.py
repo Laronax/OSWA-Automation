@@ -25,10 +25,10 @@ def run_commands_parallel(commands, max_threads):
     return return_codes
 
 def create_folders(filenames):
-    print(filenames)
+    print(filenames[7:])
     for fname in filenames:
         folder_name = fname.strip()
-        os.makedirs(folder_name, exist_ok=True)
+        os.makedirs(folder_name[7:], exist_ok=True)
         print(f"Created folder: {folder_name}")
     print("Folder creation completed.")
 
@@ -44,17 +44,20 @@ if __name__ == '__main__':
     create_folders(lines)
     commands=[]
     #Add nmap commands
-    for line in lines:
-        tline=line.strip()
-        commands.append(f"nmap -A {tline} -Pn -oN ./{tline}/nmapout	")
+    #for line in lines:
+    #    tline=line.strip()
+    #    commands.append(f"nmap -A {tline} -Pn -oN ./{tline}/nmapout	")
     # Run the commands in parallel
     
     for line in lines:
-        tline="http://"+line.strip()+"/"
-        commands.append(f"wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/raft-medium-files.txt --hc 404 {tline}|tee ./line/wfuzzfilediscovery")
+        print("MYLINE:"+line)
+        line=line.strip()
+        tline=line+"FUZZ"
+        commands.append(f"wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/raft-medium-files.txt --hc 404 {tline}|tee ./"+line[7:]+"wfuzzfilediscovery")
         tline=tline+"/"
-        commands.append(f"wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt --hc 404 {tline}./line/wfuzzfolder	discovery")
+        commands.append(f"wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt --hc 404 {tline}| tee ./"+line[7:]+"wfuzzfolderdiscovery")
 
+        print(commands)
     # Print the return codes of each command
     return_codes = run_commands_parallel(commands,MAXTHREAD)
     for i, return_code in enumerate(return_codes):
